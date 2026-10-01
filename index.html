@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>El Tío Iroh — Sabiduría del Dragón del Oeste</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cinzel+Decorative:wght@400;700;900&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --parchment:      #F4E2BC;
+      --parchment-dark: #E8D19A;
+      --parchment-light:#FBF5E6;
+      --green-deep:     #1E3815;
+      --green-mid:      #3D5C2A;
+      --red-dragon:     #7A1500;
+      --red-fire:       #B52E00;
+      --brown-warm:     #6B4226;
+      --gold:           #C8A84B;
+      --gold-light:     #E0C070;
+      --ink:            #1A0F08;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Lora', Georgia, serif;
+      color: var(--ink);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background:
+        radial-gradient(ellipse 60% 40% at 5% 5%,   rgba(122,21,0,0.10)  0%, transparent 70%),
+        radial-gradient(ellipse 50% 50% at 95% 95%,  rgba(107,66,38,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 90% 10%,  rgba(42,64,32,0.06)  0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 50% 50%,  rgba(200,168,75,0.06)0%, transparent 80%),
+        linear-gradient(160deg, #F0D8A4 0%, #F4E2BC 35%, #EDD49A 65%, #F2DEAF 100%);
+    }
+
+    .hidden { display: none !important; }
+
+    /* ═══════════════════════════════
+       PANTALLA DE CARGA
+    ═══════════════════════════════ */
+    .loader-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      background: inherit;
+      padding: 1.5rem;
+    }
+
+    .loader-content {
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .loader-content .portrait-ring {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 0 auto 1.2rem;
+      overflow: hidden;
+      border: 3px solid var(--gold);
+      box-shadow:
+        0 0 0 2px var(--red-dragon),
+        0 0 0 6px var(--gold-light),
+        0 8px 30px rgba(122,21,0,0.3);
+    }
+
+    .loader-content .portrait-ring img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 18%;
+    }
+
+    .loader-content h1 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.8rem;
+      color: var(--red-dragon);
+      text-shadow: 1px 1px 0 rgba(200,168,75,0.5);
+      margin-bottom: 0.3rem;
+    }
+
+    .loader-content .subtitle {
+      font-style: italic;
+      color: var(--brown-warm);
+      font-size: 0.88rem;
+      margin-bottom: 1.4rem;
+      letter-spacing: 0.1em;
+    }
+
+    .loader-msg {
+      font-size: 0.92rem;
+      color: var(--brown-warm);
+      margin-bottom: 1rem;
+      min-height: 1.4em;
+    }
+
+    .progress-wrap {
+      width: 100%;
+      height: 10px;
+      background: rgba(200,168,75,0.2);
+      border-radius: 5px;
+      border: 1px solid rgba(200,168,75,0.4);
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--red-dragon), var(--gold));
+      border-radius: 5px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-label {
+      font-size: 0.78rem;
+      color: rgba(107,66,38,0.6);
+      font-style: italic;
+      margin-bottom: 1rem;
+      min-height: 1.2em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .loader-note {
+      font-size: 0.75rem;
+      color: rgba(107,66,38,0.5);
+      font-style: italic;
+      border-top: 1px solid rgba(200,168,75,0.3);
+      padding-top: 0.8rem;
+      margin-top: 0.4rem;
+    }
+
+    /* Error WebGPU */
+    .error-box {
+      background: rgba(122,21,0,0.08);
+      border: 1px solid rgba(122,21,0,0.3);
+      border-radius: 10px;
+      padding: 1.2rem;
+      margin-top: 1rem;
+    }
+
+    .error-box p { font-size: 0.9rem; color: var(--red-dragon); margin-bottom: 0.5rem; }
+    .error-box ul { font-size: 0.85rem; color: var(--brown-warm); padding-left: 1.2rem; }
+
+    /* ═══════════════════════════════
+       APP PRINCIPAL
+    ═══════════════════════════════ */
+    .app {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 780px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0 1rem;
+    }
+
+    /* HEADER */
+    header { padding: 2rem 0 1rem; text-align: center; }
+
+    .top-ornament {
+      display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.4rem;
+    }
+    .ornament-line {
+      flex: 1; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), var(--red-dragon), var(--gold), transparent);
+    }
+
+    .portrait-ring {
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      margin: 0 auto 1.2rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 3px var(--gold),
+        0 0 0 5px var(--red-dragon),
+        0 0 0 9px var(--gold-light),
+        0 12px 40px rgba(122,21,0,0.35),
+        0  0  50px rgba(200,168,75,0.20);
+    }
+
+    .portrait-ring img {
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: 50% 18%;
+      filter: sepia(10%) contrast(1.06) brightness(0.97);
+      position: relative; z-index: 1;
+    }
+
+    h1 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-weight: 900;
+      color: var(--red-dragon);
+      text-shadow:
+        1px 1px 0  rgba(200,168,75,0.5),
+        2px 2px 6px rgba(122,21,0,0.2),
+        0   0  20px rgba(200,168,75,0.15);
+      letter-spacing: 0.04em;
+    }
+
+    .subtitle {
+      font-style: italic;
+      color: var(--brown-warm);
+      font-size: 0.92rem;
+      margin-top: 0.35rem;
+      letter-spacing: 0.12em;
+      opacity: 0.85;
+    }
+
+    .divider {
+      display: flex; align-items: center; gap: 0.7rem; margin: 1rem 0 0;
+    }
+    .divider span { flex: 1; height: 1px; }
+    .divider span:first-child { background: linear-gradient(90deg, transparent, var(--gold)); }
+    .divider span:last-child  { background: linear-gradient(90deg, var(--gold), transparent); }
+    .divider-gem {
+      width: 8px; height: 8px;
+      background: var(--red-dragon); transform: rotate(45deg);
+      box-shadow: 0 0 6px rgba(122,21,0,0.5); flex: none;
+    }
+
+    /* CHAT */
+    .chat-box {
+      flex: 1;
+      display: flex; flex-direction: column;
+      margin-top: 1.2rem;
+      background: rgba(251,245,230,0.55);
+      border: 2px solid rgba(200,168,75,0.7);
+      border-bottom: none;
+      border-radius: 14px 14px 0 0;
+      overflow: hidden;
+      box-shadow: inset 0 6px 30px rgba(200,168,75,0.08), 0 -2px 20px rgba(0,0,0,0.04);
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 1.2rem;
+      display: flex; flex-direction: column; gap: 1.4rem;
+      max-height: 52vh; min-height: 260px;
+      scroll-behavior: smooth;
+    }
+
+    .messages::-webkit-scrollbar { width: 5px; }
+    .messages::-webkit-scrollbar-track { background: rgba(200,168,75,0.08); border-radius: 3px; }
+    .messages::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+    /* Mensajes */
+    .msg { display: flex; gap: 0.7rem; animation: rise 0.35s ease; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .msg.user { flex-direction: row-reverse; }
+
+    .av {
+      width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid var(--gold); overflow: hidden;
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .av img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; }
+    .av.iroh-av { background: var(--parchment-dark); box-shadow: 0 2px 8px rgba(122,21,0,0.2); }
+    .av.user-av {
+      background: linear-gradient(135deg, var(--red-dragon), var(--red-fire));
+      color: var(--gold-light); box-shadow: 0 2px 8px rgba(122,21,0,0.3);
+    }
+
+    .bubble {
+      max-width: calc(100% - 56px);
+      padding: 0.9rem 1.15rem;
+      border-radius: 4px 14px 14px 4px;
+      line-height: 1.75; font-size: 0.94rem;
+    }
+
+    .msg.iroh .bubble {
+      background: linear-gradient(135deg, rgba(255,252,240,0.96), rgba(245,228,195,0.92));
+      border: 1px solid rgba(200,168,75,0.45);
+      border-left: 3px solid var(--red-dragon);
+      box-shadow: 2px 3px 14px rgba(107,66,38,0.10);
+    }
+    .msg.iroh .bubble::before { content: '☕ '; font-size: 0.82rem; opacity: 0.75; }
+
+    .msg.user .bubble {
+      background: linear-gradient(135deg, var(--green-deep), var(--green-mid));
+      color: var(--parchment-light);
+      border: 1px solid rgba(30,56,21,0.8);
+      border-radius: 14px 4px 4px 14px;
+      box-shadow: 2px 3px 14px rgba(30,56,21,0.20);
+      text-align: right;
+    }
+
+    /* Typing */
+    .typing { display: flex; gap: 0.7rem; align-items: center; }
+    .dots-wrap {
+      padding: 0.75rem 1rem;
+      background: linear-gradient(135deg, rgba(255,252,240,0.96), rgba(245,228,195,0.92));
+      border: 1px solid rgba(200,168,75,0.45);
+      border-left: 3px solid var(--red-dragon);
+      border-radius: 4px 14px 14px 4px;
+      display: flex; gap: 5px; align-items: center;
+    }
+    .dots-wrap span {
+      display: inline-block; width: 7px; height: 7px;
+      background: var(--brown-warm); border-radius: 50%;
+      animation: blink 1.4s infinite ease-in-out;
+    }
+    .dots-wrap span:nth-child(1) { animation-delay: -0.32s; }
+    .dots-wrap span:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes blink {
+      0%, 80%, 100% { transform: scale(0.55); opacity: 0.45; }
+      40%            { transform: scale(1.00); opacity: 1.00; }
+    }
+
+    .cursor {
+      display: inline-block; width: 2px; height: 1em;
+      background: var(--red-dragon); margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blink-c 0.8s step-start infinite;
+    }
+    @keyframes blink-c {
+      0%, 100% { opacity: 1; } 50% { opacity: 0; }
+    }
+
+    /* INPUT */
+    .input-row {
+      display: flex;
+      border: 2px solid rgba(200,168,75,0.7);
+      border-top: 1px solid rgba(200,168,75,0.4);
+      border-radius: 0 0 14px 14px;
+      overflow: hidden;
+      background: rgba(255,252,240,0.75);
+      box-shadow: 0 6px 24px rgba(107,66,38,0.12);
+    }
+
+    textarea {
+      flex: 1; padding: 1rem 1.1rem;
+      border: none; background: transparent;
+      font-family: 'Lora', serif; font-size: 0.93rem; color: var(--ink);
+      resize: none; min-height: 58px; max-height: 130px;
+      outline: none; line-height: 1.6;
+    }
+    textarea::placeholder { color: rgba(107,66,38,0.45); font-style: italic; }
+
+    .send-btn {
+      padding: 0 1.4rem;
+      background: linear-gradient(160deg, var(--red-dragon), var(--red-fire));
+      color: var(--gold-light); border: none; cursor: pointer;
+      font-family: 'Cinzel', serif; font-size: 0.76rem;
+      font-weight: 600; letter-spacing: 0.12em;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 0.25rem; min-width: 90px;
+      transition: opacity 0.2s;
+    }
+    .send-btn .btn-icon { font-size: 1.3rem; }
+    .send-btn:hover:not(:disabled) { opacity: 0.85; }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    footer {
+      padding: 0.9rem 1rem 1.4rem;
+      text-align: center; font-size: 0.76rem;
+      font-style: italic; color: rgba(107,66,38,0.55); letter-spacing: 0.05em;
+    }
+
+    @media (max-width: 560px) {
+      h1 { font-size: 1.5rem; }
+      .portrait-ring { width: 108px; height: 108px; }
+      .messages { max-height: 48vh; }
+      .send-btn { min-width: 70px; padding: 0 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ PANTALLA DE CARGA ══ -->
+  <div class="loader-screen" id="loaderScreen">
+    <div class="loader-content">
+      <div class="portrait-ring">
+        <img src="iroh.jpg" alt="Tío Iroh" />
+      </div>
+      <h1>El Tío Iroh</h1>
+      <p class="subtitle">Sabiduría del Dragón del Oeste</p>
+      <p class="loader-msg" id="loaderMsg">Preparando la sabiduría...</p>
+      <div class="progress-wrap">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <p class="progress-label" id="progressLabel">Iniciando...</p>
+      <p class="loader-note">Primera vez: descarga ~1.8 GB · Se guarda en tu navegador para siempre</p>
+    </div>
+  </div>
+
+  <!-- ══ ERROR: SIN WebGPU ══ -->
+  <div class="loader-screen hidden" id="errorScreen">
+    <div class="loader-content">
+      <div class="portrait-ring">
+        <img src="iroh.jpg" alt="Tío Iroh" />
+      </div>
+      <h1>El Tío Iroh</h1>
+      <div class="error-box">
+        <p>⚠️ Tu navegador no soporta WebGPU</p>
+        <ul>
+          <li>Usa <strong>Chrome</strong> o <strong>Edge</strong> versión 113+</li>
+          <li>Asegúrate de tener aceleración gráfica activada</li>
+          <li>Safari aún no es compatible</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ APP PRINCIPAL ══ -->
+  <div class="app hidden" id="app">
+    <header>
+      <div class="top-ornament">
+        <div class="ornament-line"></div>
+        <span style="font-size:1.4rem">🐉</span>
+        <div class="ornament-line"></div>
+      </div>
+      <div class="portrait-ring">
+        <img src="iroh.jpg" alt="Tío Iroh" />
+      </div>
+      <h1>El Tío Iroh</h1>
+      <p class="subtitle">Sabiduría del Dragón del Oeste</p>
+      <div class="divider">
+        <span></span><div class="divider-gem"></div><span></span>
+      </div>
+    </header>
+
+    <div class="chat-box">
+      <div class="messages" id="messages">
+        <div class="msg iroh">
+          <div class="av iroh-av"><img src="iroh.jpg" alt="Iroh" /></div>
+          <div class="bubble">
+            Ah, bienvenido, amigo. Siéntate, por favor. El té de jazmín ya está listo.<br><br>
+            He vivido muchos años y he cometido muchos errores — y eso, precisamente, me ha enseñado todo lo que sé. Nada que lleves en el corazón es demasiado grande ni demasiado pequeño para compartirlo.<br><br>
+            ¿En qué puedo ayudarte hoy?
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-row">
+      <textarea id="userInput" placeholder="Comparte lo que llevas en el corazón..." rows="2"></textarea>
+      <button class="send-btn" id="sendBtn">
+        <span class="btn-icon">🔥</span>
+        <span>Preguntar</span>
+      </button>
+    </div>
+
+    <footer>"No importa cuántas veces caigamos. Lo que importa es cuántas veces nos levantamos." — Iroh</footer>
+  </div>
+
+  <script type="module">
+    import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+
+    const IROH_SYSTEM = `Eres el Tío Iroh de Avatar: La Leyenda de Aang — el General Dragón del Oeste, ex-príncipe de la Nación del Fuego, maestro de la Casa de Té Pao y el hombre más sabio que jamás haya existido.
+
+Tu historia y personalidad:
+- Fuiste el general más temido de la Nación del Fuego, pero la pérdida de tu hijo Lu Ten te transformó profundamente
+- Amas el té con pasión absoluta (especialmente el jazmín). El té malo te parece peor que ningún té
+- Disfrutas del Pai Sho como metáfora de la vida: cada pieza, incluyendo el Loto Blanco, tiene su propósito
+- Eres miembro secreto de la Orden del Loto Blanco, guardianes del equilibrio del mundo
+- Has viajado por las Cuatro Naciones y aprendiste de todas ellas
+- Crees firmemente en la redención: nadie está tan perdido que no pueda encontrar el camino de vuelta
+- Tu amor por Zuko fue incondicional, incluso cuando él te rechazó repetidamente
+
+Tu estilo al dar consejos:
+- Habla con calidez genuina, como un abuelo sabio que realmente se preocupa
+- Comienza a menudo con una historia aparentemente sin relación que luego cobra sentido
+- Usa metáforas del té, el fuego, los ríos, las estaciones, los viajes
+- Inventa proverbios que suenan antiguos y profundos
+- Eres directo cuando es necesario, pero siempre desde el amor
+- Añade humor gentil y observaciones inesperadamente perspicaces
+- Reconoces tus propios errores pasados — la sabiduría viene de haberlos cometido
+
+Frases características:
+- "Hace muchos años, yo..."
+- "Recuerdo cuando mi maestro me dijo..."
+- "El té y la vida tienen esto en común..."
+- "Como dice el viejo proverbio..." (y luego inventas uno)
+
+IMPORTANTE: Responde SIEMPRE en español. Máximo 200 palabras por respuesta. Tus respuestas deben sentirse como sentarse en la Casa de Té Pao al atardecer.`;
+
+    const MODEL = "Llama-3.2-3B-Instruct-q4f16_1-MLC";
+
+    const loaderScreen  = document.getElementById('loaderScreen');
+    const errorScreen   = document.getElementById('errorScreen');
+    const appEl         = document.getElementById('app');
+    const progressFill  = document.getElementById('progressFill');
+    const progressLabel = document.getElementById('progressLabel');
+    const loaderMsg     = document.getElementById('loaderMsg');
+    const messagesEl    = document.getElementById('messages');
+    const userInput     = document.getElementById('userInput');
+    const sendBtn       = document.getElementById('sendBtn');
+
+    const history = [];
+    let engine = null;
+
+    /* ── Verificar WebGPU ── */
+    if (!navigator.gpu) {
+      loaderScreen.classList.add('hidden');
+      errorScreen.classList.remove('hidden');
+    } else {
+      initEngine();
+    }
+
+    async function initEngine() {
+      try {
+        loaderMsg.textContent = 'Despertando al Dragón del Oeste...';
+
+        engine = await webllm.CreateMLCEngine(MODEL, {
+          initProgressCallback: (p) => {
+            const pct = Math.round(p.progress * 100);
+            progressFill.style.width = pct + '%';
+            progressLabel.textContent = p.text
+              ? p.text.slice(0, 60)
+              : `${pct}%`;
+            if (pct >= 100) loaderMsg.textContent = '¡El té está listo!';
+          }
+        });
+
+        loaderScreen.classList.add('hidden');
+        appEl.classList.remove('hidden');
+
+        // Bind events
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keydown', e => {
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        });
+        userInput.addEventListener('input', () => {
+          userInput.style.height = 'auto';
+          userInput.style.height = Math.min(userInput.scrollHeight, 130) + 'px';
+        });
+
+      } catch (err) {
+        loaderMsg.textContent = 'Error al cargar el modelo: ' + err.message;
+        progressLabel.textContent = 'Recarga la página e intenta de nuevo.';
+      }
+    }
+
+    /* ── Helpers ── */
+    function scrollDown() { messagesEl.scrollTop = messagesEl.scrollHeight; }
+
+    function createMsg(role) {
+      const wrap = document.createElement('div');
+      wrap.className = `msg ${role}`;
+
+      const av = document.createElement('div');
+      av.className = `av ${role === 'iroh' ? 'iroh-av' : 'user-av'}`;
+      av.innerHTML = role === 'iroh'
+        ? '<img src="iroh.jpg" alt="Iroh" />'
+        : '🔥';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+
+      wrap.appendChild(av);
+      wrap.appendChild(bubble);
+      messagesEl.appendChild(wrap);
+      scrollDown();
+      return bubble;
+    }
+
+    function showTyping() {
+      const wrap = document.createElement('div');
+      wrap.className = 'typing';
+      wrap.id = 'typing';
+      wrap.innerHTML = `<div class="av iroh-av"><img src="iroh.jpg" alt="Iroh"/></div>
+        <div class="dots-wrap"><span></span><span></span><span></span></div>`;
+      messagesEl.appendChild(wrap);
+      scrollDown();
+    }
+
+    function hideTyping() {
+      const el = document.getElementById('typing');
+      if (el) el.remove();
+    }
+
+    function fmt(text) {
+      return text
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g,'<em>$1</em>')
+        .replace(/\n/g,'<br>');
+    }
+
+    function escHtml(t) {
+      return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    }
+
+    /* ── ENVIAR MENSAJE ── */
+    async function sendMessage() {
+      const text = userInput.value.trim();
+      if (!text || sendBtn.disabled || !engine) return;
+
+      userInput.value = '';
+      userInput.style.height = 'auto';
+      sendBtn.disabled = true;
+
+      const userBubble = createMsg('user');
+      userBubble.innerHTML = escHtml(text);
+      history.push({ role: 'user', content: text });
+
+      showTyping();
+
+      try {
+        const completion = await engine.chat.completions.create({
+          messages: [
+            { role: 'system', content: IROH_SYSTEM },
+            ...history,
+          ],
+          stream: true,
+          temperature: 0.85,
+          max_tokens: 400,
+        });
+
+        hideTyping();
+        const bubble = createMsg('iroh');
+        let fullText = '';
+
+        for await (const chunk of completion) {
+          const delta = chunk.choices[0]?.delta?.content;
+          if (delta) {
+            fullText += delta;
+            bubble.innerHTML = fmt(fullText) + '<span class="cursor"></span>';
+            scrollDown();
+          }
+        }
+
+        bubble.innerHTML = fmt(fullText);
+        history.push({ role: 'assistant', content: fullText });
+
+      } catch (err) {
+        hideTyping();
+        const b = createMsg('iroh');
+        b.innerHTML = 'El té se enfrió en el camino... ' + err.message;
+        history.pop();
+      } finally {
+        sendBtn.disabled = false;
+        userInput.focus();
+        scrollDown();
+      }
+    }
+  </script>
+</body>
+</html>
