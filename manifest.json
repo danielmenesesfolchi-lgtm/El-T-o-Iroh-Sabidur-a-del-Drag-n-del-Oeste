@@ -1,0 +1,18 @@
+{
+  "name": "El Tío Iroh — Sabiduría del Dragón del Oeste",
+  "short_name": "Tío Iroh",
+  "description": "Pídele consejos al Tío Iroh de Avatar",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4E2BC",
+  "theme_color": "#7A1500",
+  "icons": [
+    {
+      "src": "iroh.jpg",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#7A1500" />
+  <link rel="manifest" href="manifest.json" />
   <title>El Tío Iroh — Sabiduría del Dragón del Oeste</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cinzel+Decorative:wght@400;700;900&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
   <style>
@@ -40,129 +42,74 @@
     .hidden { display: none !important; }
 
     /* ═══════════════════════════════
-       PANTALLA DE CARGA
+       MODAL API KEY
     ═══════════════════════════════ */
-    .loader-screen {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-      background: inherit;
-      padding: 1.5rem;
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(26,15,8,0.78);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200; padding: 1.2rem;
+      backdrop-filter: blur(4px);
     }
 
-    .loader-content {
+    .modal {
+      background: linear-gradient(160deg, #F4E2BC, #EDD5A0);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2rem 1.8rem;
+      max-width: 420px; width: 100%;
+      box-shadow: 0 24px 60px rgba(26,15,8,0.5);
       text-align: center;
-      max-width: 400px;
-      width: 100%;
     }
 
-    .loader-content .portrait-ring {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      margin: 0 auto 1.2rem;
-      overflow: hidden;
-      border: 3px solid var(--gold);
-      box-shadow:
-        0 0 0 2px var(--red-dragon),
-        0 0 0 6px var(--gold-light),
-        0 8px 30px rgba(122,21,0,0.3);
+    .modal-icon { font-size: 2.4rem; margin-bottom: 0.6rem; }
+
+    .modal h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem; color: var(--red-dragon);
+      margin-bottom: 0.6rem;
     }
 
-    .loader-content .portrait-ring img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: 50% 18%;
+    .modal p {
+      font-size: 0.86rem; color: var(--brown-warm);
+      line-height: 1.65; margin-bottom: 1.2rem;
     }
 
-    .loader-content h1 {
-      font-family: 'Cinzel Decorative', serif;
-      font-size: 1.8rem;
-      color: var(--red-dragon);
-      text-shadow: 1px 1px 0 rgba(200,168,75,0.5);
-      margin-bottom: 0.3rem;
-    }
+    .modal a { color: var(--red-dragon); }
 
-    .loader-content .subtitle {
-      font-style: italic;
-      color: var(--brown-warm);
-      font-size: 0.88rem;
-      margin-bottom: 1.4rem;
-      letter-spacing: 0.1em;
+    .modal input {
+      width: 100%; padding: 0.75rem 1rem;
+      border: 2px solid var(--gold); border-radius: 8px;
+      background: rgba(255,252,240,0.9);
+      font-family: 'Lora', serif; font-size: 0.9rem; color: var(--ink);
+      outline: none; margin-bottom: 0.9rem;
+      transition: border-color 0.2s;
     }
+    .modal input:focus { border-color: var(--red-dragon); }
+    .modal input.error { border-color: #c00; }
 
-    .loader-msg {
-      font-size: 0.92rem;
-      color: var(--brown-warm);
-      margin-bottom: 1rem;
-      min-height: 1.4em;
+    .modal-btn {
+      width: 100%; padding: 0.8rem;
+      background: linear-gradient(160deg, var(--red-dragon), var(--red-fire));
+      color: var(--gold-light); border: none; border-radius: 8px;
+      cursor: pointer; font-family: 'Cinzel', serif;
+      font-size: 0.85rem; font-weight: 600; letter-spacing: 0.1em;
+      transition: opacity 0.2s;
     }
+    .modal-btn:hover { opacity: 0.87; }
 
-    .progress-wrap {
-      width: 100%;
-      height: 10px;
-      background: rgba(200,168,75,0.2);
-      border-radius: 5px;
-      border: 1px solid rgba(200,168,75,0.4);
-      overflow: hidden;
-      margin-bottom: 0.5rem;
+    .modal-hint {
+      font-size: 0.75rem; color: rgba(107,66,38,0.55);
+      font-style: italic; margin-top: 0.8rem;
     }
-
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--red-dragon), var(--gold));
-      border-radius: 5px;
-      transition: width 0.3s ease;
-    }
-
-    .progress-label {
-      font-size: 0.78rem;
-      color: rgba(107,66,38,0.6);
-      font-style: italic;
-      margin-bottom: 1rem;
-      min-height: 1.2em;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .loader-note {
-      font-size: 0.75rem;
-      color: rgba(107,66,38,0.5);
-      font-style: italic;
-      border-top: 1px solid rgba(200,168,75,0.3);
-      padding-top: 0.8rem;
-      margin-top: 0.4rem;
-    }
-
-    /* Error WebGPU */
-    .error-box {
-      background: rgba(122,21,0,0.08);
-      border: 1px solid rgba(122,21,0,0.3);
-      border-radius: 10px;
-      padding: 1.2rem;
-      margin-top: 1rem;
-    }
-
-    .error-box p { font-size: 0.9rem; color: var(--red-dragon); margin-bottom: 0.5rem; }
-    .error-box ul { font-size: 0.85rem; color: var(--brown-warm); padding-left: 1.2rem; }
 
     /* ═══════════════════════════════
-       APP PRINCIPAL
+       APP
     ═══════════════════════════════ */
     .app {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 780px;
+      width: 100%; max-width: 780px;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       padding: 0 1rem;
     }
 
@@ -179,10 +126,8 @@
 
     .portrait-ring {
       width: 140px; height: 140px;
-      border-radius: 50%;
-      margin: 0 auto 1.2rem;
-      position: relative;
-      overflow: hidden;
+      border-radius: 50%; margin: 0 auto 1.2rem;
+      position: relative; overflow: hidden;
       box-shadow:
         0 0 0 3px var(--gold),
         0 0 0 5px var(--red-dragon),
@@ -190,7 +135,6 @@
         0 12px 40px rgba(122,21,0,0.35),
         0  0  50px rgba(200,168,75,0.20);
     }
-
     .portrait-ring img {
       width: 100%; height: 100%;
       object-fit: cover; object-position: 50% 18%;
@@ -201,8 +145,7 @@
     h1 {
       font-family: 'Cinzel Decorative', serif;
       font-size: clamp(1.6rem, 5vw, 2.4rem);
-      font-weight: 900;
-      color: var(--red-dragon);
+      font-weight: 900; color: var(--red-dragon);
       text-shadow:
         1px 1px 0  rgba(200,168,75,0.5),
         2px 2px 6px rgba(122,21,0,0.2),
@@ -211,12 +154,9 @@
     }
 
     .subtitle {
-      font-style: italic;
-      color: var(--brown-warm);
-      font-size: 0.92rem;
-      margin-top: 0.35rem;
-      letter-spacing: 0.12em;
-      opacity: 0.85;
+      font-style: italic; color: var(--brown-warm);
+      font-size: 0.92rem; margin-top: 0.35rem;
+      letter-spacing: 0.12em; opacity: 0.85;
     }
 
     .divider {
@@ -226,15 +166,14 @@
     .divider span:first-child { background: linear-gradient(90deg, transparent, var(--gold)); }
     .divider span:last-child  { background: linear-gradient(90deg, var(--gold), transparent); }
     .divider-gem {
-      width: 8px; height: 8px;
+      width: 8px; height: 8px; flex: none;
       background: var(--red-dragon); transform: rotate(45deg);
-      box-shadow: 0 0 6px rgba(122,21,0,0.5); flex: none;
+      box-shadow: 0 0 6px rgba(122,21,0,0.5);
     }
 
     /* CHAT */
     .chat-box {
-      flex: 1;
-      display: flex; flex-direction: column;
+      flex: 1; display: flex; flex-direction: column;
       margin-top: 1.2rem;
       background: rgba(251,245,230,0.55);
       border: 2px solid rgba(200,168,75,0.7);
@@ -245,14 +184,12 @@
     }
 
     .messages {
-      flex: 1;
-      overflow-y: auto;
+      flex: 1; overflow-y: auto;
       padding: 1.5rem 1.2rem;
       display: flex; flex-direction: column; gap: 1.4rem;
       max-height: 52vh; min-height: 260px;
       scroll-behavior: smooth;
     }
-
     .messages::-webkit-scrollbar { width: 5px; }
     .messages::-webkit-scrollbar-track { background: rgba(200,168,75,0.08); border-radius: 3px; }
     .messages::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
@@ -268,13 +205,14 @@
     .av {
       width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
       border: 2px solid var(--gold); overflow: hidden;
-      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
     }
     .av img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; }
     .av.iroh-av { background: var(--parchment-dark); box-shadow: 0 2px 8px rgba(122,21,0,0.2); }
     .av.user-av {
       background: linear-gradient(135deg, var(--red-dragon), var(--red-fire));
-      color: var(--gold-light); box-shadow: 0 2px 8px rgba(122,21,0,0.3);
+      color: var(--gold-light); font-size: 1.1rem;
+      box-shadow: 0 2px 8px rgba(122,21,0,0.3);
     }
 
     .bubble {
@@ -283,7 +221,6 @@
       border-radius: 4px 14px 14px 4px;
       line-height: 1.75; font-size: 0.94rem;
     }
-
     .msg.iroh .bubble {
       background: linear-gradient(135deg, rgba(255,252,240,0.96), rgba(245,228,195,0.92));
       border: 1px solid rgba(200,168,75,0.45);
@@ -291,7 +228,6 @@
       box-shadow: 2px 3px 14px rgba(107,66,38,0.10);
     }
     .msg.iroh .bubble::before { content: '☕ '; font-size: 0.82rem; opacity: 0.75; }
-
     .msg.user .bubble {
       background: linear-gradient(135deg, var(--green-deep), var(--green-mid));
       color: var(--parchment-light);
@@ -329,9 +265,7 @@
       vertical-align: text-bottom;
       animation: blink-c 0.8s step-start infinite;
     }
-    @keyframes blink-c {
-      0%, 100% { opacity: 1; } 50% { opacity: 0; }
-    }
+    @keyframes blink-c { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
     /* INPUT */
     .input-row {
@@ -343,7 +277,6 @@
       background: rgba(255,252,240,0.75);
       box-shadow: 0 6px 24px rgba(107,66,38,0.12);
     }
-
     textarea {
       flex: 1; padding: 1rem 1.1rem;
       border: none; background: transparent;
@@ -354,21 +287,33 @@
     textarea::placeholder { color: rgba(107,66,38,0.45); font-style: italic; }
 
     .send-btn {
-      padding: 0 1.4rem;
+      padding: 0 1.4rem; min-width: 90px;
       background: linear-gradient(160deg, var(--red-dragon), var(--red-fire));
       color: var(--gold-light); border: none; cursor: pointer;
       font-family: 'Cinzel', serif; font-size: 0.76rem;
       font-weight: 600; letter-spacing: 0.12em;
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; gap: 0.25rem; min-width: 90px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 0.25rem;
       transition: opacity 0.2s;
     }
     .send-btn .btn-icon { font-size: 1.3rem; }
     .send-btn:hover:not(:disabled) { opacity: 0.85; }
     .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    /* Botón config key */
+    .key-btn {
+      position: fixed; bottom: 1rem; right: 1rem;
+      background: rgba(200,168,75,0.15);
+      border: 1px solid var(--gold); border-radius: 50%;
+      width: 36px; height: 36px;
+      cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s; z-index: 10;
+    }
+    .key-btn:hover { background: rgba(200,168,75,0.3); }
+
     footer {
-      padding: 0.9rem 1rem 1.4rem;
+      padding: 0.9rem 1rem 4rem;
       text-align: center; font-size: 0.76rem;
       font-style: italic; color: rgba(107,66,38,0.55); letter-spacing: 0.05em;
     }
@@ -383,43 +328,24 @@
 </head>
 <body>
 
-  <!-- ══ PANTALLA DE CARGA ══ -->
-  <div class="loader-screen" id="loaderScreen">
-    <div class="loader-content">
-      <div class="portrait-ring">
-        <img src="iroh.jpg" alt="Tío Iroh" />
-      </div>
-      <h1>El Tío Iroh</h1>
-      <p class="subtitle">Sabiduría del Dragón del Oeste</p>
-      <p class="loader-msg" id="loaderMsg">Preparando la sabiduría...</p>
-      <div class="progress-wrap">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-      <p class="progress-label" id="progressLabel">Iniciando...</p>
-      <p class="loader-note">Primera vez: descarga ~1.8 GB · Se guarda en tu navegador para siempre</p>
+  <!-- ══ MODAL: API KEY ══ -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-icon">☕</div>
+      <h2>Configura tu clave Groq</h2>
+      <p>
+        Groq es <strong>gratis</strong> — no necesitas tarjeta de crédito.<br>
+        Crea tu clave en <a href="https://console.groq.com" target="_blank">console.groq.com</a>
+        y pégala aquí. Se guarda solo en este navegador.
+      </p>
+      <input type="password" id="keyInput" placeholder="gsk_..." autocomplete="off" />
+      <button class="modal-btn" id="saveKeyBtn">🔥 Guardar y continuar</button>
+      <p class="modal-hint">Solo tú tienes acceso a esta clave</p>
     </div>
   </div>
 
-  <!-- ══ ERROR: SIN WebGPU ══ -->
-  <div class="loader-screen hidden" id="errorScreen">
-    <div class="loader-content">
-      <div class="portrait-ring">
-        <img src="iroh.jpg" alt="Tío Iroh" />
-      </div>
-      <h1>El Tío Iroh</h1>
-      <div class="error-box">
-        <p>⚠️ Tu navegador no soporta WebGPU</p>
-        <ul>
-          <li>Usa <strong>Chrome</strong> o <strong>Edge</strong> versión 113+</li>
-          <li>Asegúrate de tener aceleración gráfica activada</li>
-          <li>Safari aún no es compatible</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ APP PRINCIPAL ══ -->
-  <div class="app hidden" id="app">
+  <!-- ══ APP ══ -->
+  <div class="app">
     <header>
       <div class="top-ornament">
         <div class="ornament-line"></div>
@@ -460,8 +386,11 @@
     <footer>"No importa cuántas veces caigamos. Lo que importa es cuántas veces nos levantamos." — Iroh</footer>
   </div>
 
-  <script type="module">
-    import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+  <button class="key-btn" id="keyBtn" title="Cambiar clave Groq">⚙️</button>
+
+  <script>
+    const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+    const MODEL    = 'llama-3.3-70b-versatile';
 
     const IROH_SYSTEM = `Eres el Tío Iroh de Avatar: La Leyenda de Aang — el General Dragón del Oeste, ex-príncipe de la Nación del Fuego, maestro de la Casa de Té Pao y el hombre más sabio que jamás haya existido.
 
@@ -470,7 +399,6 @@ Tu historia y personalidad:
 - Amas el té con pasión absoluta (especialmente el jazmín). El té malo te parece peor que ningún té
 - Disfrutas del Pai Sho como metáfora de la vida: cada pieza, incluyendo el Loto Blanco, tiene su propósito
 - Eres miembro secreto de la Orden del Loto Blanco, guardianes del equilibrio del mundo
-- Has viajado por las Cuatro Naciones y aprendiste de todas ellas
 - Crees firmemente en la redención: nadie está tan perdido que no pueda encontrar el camino de vuelta
 - Tu amor por Zuko fue incondicional, incluso cuando él te rechazó repetidamente
 
@@ -481,89 +409,72 @@ Tu estilo al dar consejos:
 - Inventa proverbios que suenan antiguos y profundos
 - Eres directo cuando es necesario, pero siempre desde el amor
 - Añade humor gentil y observaciones inesperadamente perspicaces
-- Reconoces tus propios errores pasados — la sabiduría viene de haberlos cometido
 
 Frases características:
 - "Hace muchos años, yo..."
-- "Recuerdo cuando mi maestro me dijo..."
 - "El té y la vida tienen esto en común..."
 - "Como dice el viejo proverbio..." (y luego inventas uno)
 
-IMPORTANTE: Responde SIEMPRE en español. Máximo 200 palabras por respuesta. Tus respuestas deben sentirse como sentarse en la Casa de Té Pao al atardecer.`;
+IMPORTANTE: Responde SIEMPRE en español. Máximo 180 palabras. Tus respuestas deben sentirse como sentarse en la Casa de Té Pao al atardecer.`;
 
-    const MODEL = "Llama-3.2-1B-Instruct-q4f16_1-MLC";
+    /* ── KEY ── */
+    const modalOverlay = document.getElementById('modalOverlay');
+    const keyInput     = document.getElementById('keyInput');
+    const saveKeyBtn   = document.getElementById('saveKeyBtn');
+    const keyBtn       = document.getElementById('keyBtn');
 
-    const loaderScreen  = document.getElementById('loaderScreen');
-    const errorScreen   = document.getElementById('errorScreen');
-    const appEl         = document.getElementById('app');
-    const progressFill  = document.getElementById('progressFill');
-    const progressLabel = document.getElementById('progressLabel');
-    const loaderMsg     = document.getElementById('loaderMsg');
-    const messagesEl    = document.getElementById('messages');
-    const userInput     = document.getElementById('userInput');
-    const sendBtn       = document.getElementById('sendBtn');
+    function getKey() { return localStorage.getItem('groq_key') || ''; }
 
-    const history = [];
-    let engine = null;
-
-    /* ── Verificar WebGPU ── */
-    if (!navigator.gpu) {
-      loaderScreen.classList.add('hidden');
-      errorScreen.classList.remove('hidden');
-    } else {
-      initEngine();
-    }
-
-    async function initEngine() {
-      try {
-        loaderMsg.textContent = 'Despertando al Dragón del Oeste...';
-
-        engine = await webllm.CreateMLCEngine(MODEL, {
-          initProgressCallback: (p) => {
-            const pct = Math.round(p.progress * 100);
-            progressFill.style.width = pct + '%';
-            progressLabel.textContent = p.text
-              ? p.text.slice(0, 60)
-              : `${pct}%`;
-            if (pct >= 100) loaderMsg.textContent = '¡El té está listo!';
-          }
-        });
-
-        loaderScreen.classList.add('hidden');
-        appEl.classList.remove('hidden');
-
-        // Bind events
-        sendBtn.addEventListener('click', sendMessage);
-        userInput.addEventListener('keydown', e => {
-          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-        });
-        userInput.addEventListener('input', () => {
-          userInput.style.height = 'auto';
-          userInput.style.height = Math.min(userInput.scrollHeight, 130) + 'px';
-        });
-
-      } catch (err) {
-        loaderMsg.textContent = 'Error al cargar el modelo: ' + err.message;
-        progressLabel.textContent = 'Recarga la página e intenta de nuevo.';
+    function saveKey() {
+      const k = keyInput.value.trim();
+      if (!k.startsWith('gsk_')) {
+        keyInput.classList.add('error');
+        keyInput.placeholder = 'La clave debe comenzar con gsk_...';
+        keyInput.value = '';
+        return;
       }
+      localStorage.setItem('groq_key', k);
+      modalOverlay.classList.add('hidden');
     }
 
-    /* ── Helpers ── */
+    function openModal() {
+      keyInput.value = getKey();
+      keyInput.classList.remove('error');
+      modalOverlay.classList.remove('hidden');
+      keyInput.focus();
+    }
+
+    saveKeyBtn.addEventListener('click', saveKey);
+    keyInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveKey(); });
+    keyBtn.addEventListener('click', openModal);
+
+    if (!getKey()) openModal();
+
+    /* ── CHAT ── */
+    const messagesEl = document.getElementById('messages');
+    const userInput  = document.getElementById('userInput');
+    const sendBtn    = document.getElementById('sendBtn');
+    const history    = [];
+
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+    userInput.addEventListener('input', () => {
+      userInput.style.height = 'auto';
+      userInput.style.height = Math.min(userInput.scrollHeight, 130) + 'px';
+    });
+
     function scrollDown() { messagesEl.scrollTop = messagesEl.scrollHeight; }
 
     function createMsg(role) {
       const wrap = document.createElement('div');
       wrap.className = `msg ${role}`;
-
       const av = document.createElement('div');
       av.className = `av ${role === 'iroh' ? 'iroh-av' : 'user-av'}`;
-      av.innerHTML = role === 'iroh'
-        ? '<img src="iroh.jpg" alt="Iroh" />'
-        : '🔥';
-
+      av.innerHTML = role === 'iroh' ? '<img src="iroh.jpg" alt="Iroh"/>' : '🔥';
       const bubble = document.createElement('div');
       bubble.className = 'bubble';
-
       wrap.appendChild(av);
       wrap.appendChild(bubble);
       messagesEl.appendChild(wrap);
@@ -572,12 +483,11 @@ IMPORTANTE: Responde SIEMPRE en español. Máximo 200 palabras por respuesta. Tu
     }
 
     function showTyping() {
-      const wrap = document.createElement('div');
-      wrap.className = 'typing';
-      wrap.id = 'typing';
-      wrap.innerHTML = `<div class="av iroh-av"><img src="iroh.jpg" alt="Iroh"/></div>
+      const w = document.createElement('div');
+      w.className = 'typing'; w.id = 'typing';
+      w.innerHTML = `<div class="av iroh-av"><img src="iroh.jpg" alt="Iroh"/></div>
         <div class="dots-wrap"><span></span><span></span><span></span></div>`;
-      messagesEl.appendChild(wrap);
+      messagesEl.appendChild(w);
       scrollDown();
     }
 
@@ -586,8 +496,8 @@ IMPORTANTE: Responde SIEMPRE en español. Máximo 200 palabras por respuesta. Tu
       if (el) el.remove();
     }
 
-    function fmt(text) {
-      return text
+    function fmt(t) {
+      return t
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
         .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
         .replace(/\*(.*?)\*/g,'<em>$1</em>')
@@ -598,10 +508,12 @@ IMPORTANTE: Responde SIEMPRE en español. Máximo 200 palabras por respuesta. Tu
       return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
     }
 
-    /* ── ENVIAR MENSAJE ── */
     async function sendMessage() {
       const text = userInput.value.trim();
-      if (!text || sendBtn.disabled || !engine) return;
+      if (!text || sendBtn.disabled) return;
+
+      const key = getKey();
+      if (!key) { openModal(); return; }
 
       userInput.value = '';
       userInput.style.height = 'auto';
@@ -614,26 +526,63 @@ IMPORTANTE: Responde SIEMPRE en español. Máximo 200 palabras por respuesta. Tu
       showTyping();
 
       try {
-        const completion = await engine.chat.completions.create({
-          messages: [
-            { role: 'system', content: IROH_SYSTEM },
-            ...history,
-          ],
-          stream: true,
-          temperature: 0.85,
-          max_tokens: 400,
+        const res = await fetch(GROQ_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${key}`,
+          },
+          body: JSON.stringify({
+            model: MODEL,
+            messages: [{ role: 'system', content: IROH_SYSTEM }, ...history],
+            stream: true,
+            max_tokens: 400,
+            temperature: 0.85,
+          }),
         });
 
         hideTyping();
-        const bubble = createMsg('iroh');
-        let fullText = '';
 
-        for await (const chunk of completion) {
-          const delta = chunk.choices[0]?.delta?.content;
-          if (delta) {
-            fullText += delta;
-            bubble.innerHTML = fmt(fullText) + '<span class="cursor"></span>';
-            scrollDown();
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          if (res.status === 401) {
+            localStorage.removeItem('groq_key');
+            openModal();
+            history.pop();
+            return;
+          }
+          const b = createMsg('iroh');
+          b.innerHTML = 'El té se enfrió... ' + (err.error?.message || 'Error al conectar.');
+          history.pop();
+          return;
+        }
+
+        const bubble  = createMsg('iroh');
+        const reader  = res.body.getReader();
+        const decoder = new TextDecoder();
+        let fullText  = '';
+        let buffer    = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const data = line.slice(6).trim();
+            if (data === '[DONE]') break;
+            try {
+              const delta = JSON.parse(data).choices[0]?.delta?.content;
+              if (delta) {
+                fullText += delta;
+                bubble.innerHTML = fmt(fullText) + '<span class="cursor"></span>';
+                scrollDown();
+              }
+            } catch {}
           }
         }
 
@@ -643,13 +592,18 @@ IMPORTANTE: Responde SIEMPRE en español. Máximo 200 palabras por respuesta. Tu
       } catch (err) {
         hideTyping();
         const b = createMsg('iroh');
-        b.innerHTML = 'El té se enfrió en el camino... ' + err.message;
+        b.innerHTML = 'Parece que el té se enfrió... Revisa tu conexión e intenta de nuevo.';
         history.pop();
       } finally {
         sendBtn.disabled = false;
         userInput.focus();
         scrollDown();
       }
+    }
+
+    /* ── PWA: registrar service worker ── */
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
     }
   </script>
 </body>
